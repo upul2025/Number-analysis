@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ලොතරැයි විශ්ලේෂණය</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    .title-box {
+      border: 2px solid #ff0066;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #ff3399;
+      background-color: rgba(0, 0, 0, 0.4);
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-size: 2em;
+      color: #ff0066;
+      text-shadow: 0 0 15px #ff0066, 0 0 25px #ff3399;
+      margin: 0;
+    }
+
+    .section {
+      border: 2px solid #ff0066;
+      padding: 15px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px #ff3399;
+      width: 100%;
+      max-width: 600px;
+      background-color: rgba(0,0,0,0.3);
+      backdrop-filter: blur(4px);
+    }
+
+    .section h2 {
+      color: white;
+      font-weight: bold;
+      text-shadow: none;
+    }
+
+    .number-box {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .number-box label {
+      background: #222;
+      padding: 10px;
+      border: 1px solid #ff0066;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ff3399;
+      display: inline-block;
+      text-align: center;
+      width: 60px;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      padding: 8px;
+      background-color: #000;
+      border: 1px solid #00ffff;
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #00ffff;
+      text-align: center;
+    }
+
+    button {
+      background: linear-gradient(45deg, #ff0066, #ffcc00);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ff0066;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: linear-gradient(45deg, #ff3399, #ffee00);
+    }
+
+    .clear-button {
+      margin-top: 20px;
+      background: #ff0066;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ff0066;
+    }
+
+    .clear-button:hover {
+      background: #ff3399;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="title-box">
+    <h1>අංක විශ්ලේෂණය</h1>
+  </div>
+
+  <div class="section">
+    <h2>ආරම්භක අංක ඇතුළත් කරන්න</h2>
+    <div class="number-box" id="inputFields">
+      <input type="number" placeholder="අංකයක්" />
+      <input type="number" placeholder="අංකයක්" />
+      <input type="number" placeholder="අංකයක්" />
+      <input type="number" placeholder="අංකයක්" />
+      <input type="number" placeholder="අංකයක්" />
+      <input type="number" placeholder="අංකයක්" />
+    </div>
+    <button onclick="analyze()">විශ්ලේෂණය කරන්න</button>
+    <button class="clear-button" onclick="clearInputs()">Clear All Inputs</button>
+  </div>
+
+  <div class="section">
+    <h2>1 වන වටය</h2>
+    <div class="number-box" id="round1Results"></div>
+  </div>
+
+  <div class="section">
+    <h2>2 වන වටය</h2>
+    <div class="number-box" id="round2Results"></div>
+  </div>
+
+  <div class="section">
+    <h2>3 වන වටය</h2>
+    <div class="number-box" id="round3Results"></div>
+  </div>
+
+  <script>
+    function analyze() {
+      const inputs = Array.from(document.querySelectorAll('#inputFields input'))
+        .map(input => Number(input.value))
+        .filter(val => !isNaN(val));
+
+      // Round 1
+      let round1 = [];
+      if (inputs.length > 0) {
+        round1.push(inputs[0]);
+        for (let i = 1; i < inputs.length; i++) {
+          const diff = inputs[i] - inputs[i - 1];
+          if (diff >= 0) round1.push(diff);
+        }
+      }
+
+      // Round 2
+      let round2 = [];
+      if (round1.length > 0) {
+        round2.push(round1[0]);
+        for (let i = 1; i < round1.length; i++) {
+          const diff = round1[i] - round1[i - 1];
+          if (diff >= 0) round2.push(diff);
+        }
+      }
+
+      // Round 3 - Summing consecutive values from round1
+      let round3 = [];
+      if (round1.length > 0) {
+        round3.push(round1[0]);
+        for (let i = 1; i < round1.length; i++) {
+          round3.push(round1[i] + round1[i - 1]);
+        }
+      }
+
+      displayResults('round1Results', round1);
+      displayResults('round2Results', round2);
+      displayResults('round3Results', round3);
+    }
+
+    function displayResults(elementId, numbers) {
+      const container = document.getElementById(elementId);
+      container.innerHTML = '';
+      numbers.forEach(num => {
+        const label = document.createElement('label');
+        label.textContent = num;
+        container.appendChild(label);
+      });
+    }
+
+    function clearInputs() {
+      const inputs = document.querySelectorAll('#inputFields input');
+      inputs.forEach(input => {
+        input.value = ''; // Clear the input values
+      });
+    }
+  </script>
+
+</body>
+</html>
